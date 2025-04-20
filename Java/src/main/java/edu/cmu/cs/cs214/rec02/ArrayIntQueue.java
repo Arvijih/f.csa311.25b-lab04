@@ -1,95 +1,59 @@
 package edu.cmu.cs.cs214.rec02;
 
-import java.util.Arrays;
-
-/**
- * A resizable-array implementation of the {@link IntQueue} interface. The head of
- * the queue starts out at the head of the array, allowing the queue to grow and
- * shrink in constant time.
- *
- * TODO: This implementation contains three bugs! Use your tests to determine the
- * source of the bugs and correct them!
- *
- * @author Alex Lockwood
- * @author Ye Lu
- */
 public class ArrayIntQueue implements IntQueue {
-
-    /**
-     * An array holding this queue's data
-     */
     private int[] elementData;
-
-    /**
-     * Index of the next dequeue-able value
-     */
     private int head;
-
-    /**
-     * Current size of queue
-     */
+    private int tail;
     private int size;
 
-    /**
-     * The initial size for new instances of ArrayQueue
-     */
-    private static final int INITIAL_SIZE = 10;
-
-    /**
-     * Constructs an empty queue with an initial capacity of ten.
-     */
     public ArrayIntQueue() {
-        elementData = new int[INITIAL_SIZE];
+        elementData = new int[10];
         head = 0;
+        tail = 0;
         size = 0;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void clear() {
-        Arrays.fill(elementData, 0);
-        size = 0;
         head = 0;
+        tail = 0;
+        size = 0;
+        elementData = new int[10]; // Reset the array
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Integer dequeue() {
-        if (isEmpty()) {
-            return null;
-        }
+        if (isEmpty()) return null;
         Integer value = elementData[head];
         head = (head + 1) % elementData.length;
         size--;
         return value;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public boolean enqueue(Integer value) {
         ensureCapacity();
-        int tail = (head + size) % elementData.length;
         elementData[tail] = value;
+        tail = (tail + 1) % elementData.length;
         size++;
         return true;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public boolean isEmpty() {
-        return size >= 0;
+        return size == 0;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Integer peek() {
-        return elementData[head];
+        return isEmpty() ? null : elementData[head];
     }
 
-    /** {@inheritDoc} */
+    @Override
     public int size() {
         return size;
     }
 
-    /**
-     * Increases the capacity of this <tt>ArrayIntQueue</tt> instance, if
-     * necessary, to ensure that it can hold at least size + 1 elements.
-     */
     private void ensureCapacity() {
         if (size == elementData.length) {
             int oldCapacity = elementData.length;
@@ -99,10 +63,26 @@ public class ArrayIntQueue implements IntQueue {
                 newData[i - head] = elementData[i];
             }
             for (int i = 0; i < head; i++) {
-                newData[head - i] = elementData[i];
+                newData[oldCapacity - head + i] = elementData[i];
             }
             elementData = newData;
             head = 0;
+            tail = size;
         }
+    }
+
+    // Main method added here for testing
+    public static void main(String[] args) {
+        ArrayIntQueue queue = new ArrayIntQueue();
+
+        // Test enqueue
+        queue.enqueue(1);
+        queue.enqueue(2);
+        queue.enqueue(3);
+
+        // Test peek and dequeue
+        System.out.println("Peek: " + queue.peek()); // Should print 1
+        System.out.println("Dequeue: " + queue.dequeue()); // Should print 1
+        System.out.println("Peek after dequeue: " + queue.peek()); // Should print 2
     }
 }
